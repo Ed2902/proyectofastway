@@ -145,23 +145,6 @@
   <!-- /#wrapper -->
   <!-- Script para alternar el menú -->
   <script src="./js/sidebar.js"></script>
-  
-  <!-- Script adicional para mostrar tooltips en la barra lateral -->
-  <script>
-    $(document).ready(function () {
-      // Agregar función para mostrar tooltips en la barra lateral
-      $('.sidebar-nav li').hover(function () {
-        var tooltipText = $(this).attr('data-tooltip');
-        $(this).append('<div class="tooltip">' + tooltipText + '</div>');
-      }, function () {
-        // Remover el tooltip al dejar de hacer hover
-        $('.tooltip').remove();
-      });
-    });
-
-
-    
-  </script>
 </body>
 
 </html>
