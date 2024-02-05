@@ -3,13 +3,13 @@ var inventarioData = [];  // Array para almacenar los datos del inventario
 function agregarFilaTabla() {
     var codigoProducto = document.getElementById("CodigoProducto").value;
     var referencia = document.getElementById("Referencia").value;
-    var diseno = document.getElementById("Diseno").value;
+    var tipo = document.getElementById("tipo").value;
     var marca = document.getElementById("Marca").value;
     var quienDaIngreso = document.getElementById("QuienDaIngreso").value;
     var Fw = document.getElementById("FW").value;
     var cantidadesAgregar = document.getElementById("CantidadesAgregar").value;
 
-    if (!codigoProducto || !referencia || !diseno || !marca || !quienDaIngreso || !Fw || !cantidadesAgregar) {
+    if (!referencia || !tipo || !marca || !quienDaIngreso || !Fw || !cantidadesAgregar) {
         alert("Todos los campos son obligatorios. Por favor, complete todos los campos.");
         return;
     }
@@ -19,7 +19,7 @@ function agregarFilaTabla() {
         alert("Por favor, ingrese un valor de texto en el campo 'Quién da el ingreso'.");
         return;
     }
-    
+
     if (!/^\d+$/.test(cantidadesAgregar)) {
         alert("Por favor, ingrese un número entero en el campo 'Cantidades a Agregar'.");
         return;
@@ -39,7 +39,7 @@ function agregarFilaTabla() {
 
     cell1.innerHTML = codigoProducto;
     cell2.innerHTML = referencia;
-    cell3.innerHTML = diseno;
+    cell3.innerHTML = tipo;
     cell4.innerHTML = marca;
     cell5.innerHTML = quienDaIngreso;
     cell6.innerHTML = Fw;
@@ -64,7 +64,7 @@ function agregarFilaTabla() {
     var filaDatos = {
         CodigoProducto: codigoProducto,
         Referencia: referencia,
-        Diseno: diseno,
+        Tipo: tipo,  
         Marca: marca,
         QuienDaIngreso: quienDaIngreso,
         FW: Fw,
@@ -78,22 +78,19 @@ function agregarFilaTabla() {
 
 function editarFila(button) {
     var row = button.parentNode.parentNode;
+    var rowIndex = row.cells[0].innerHTML;
 
-    var codigoProducto = row.cells[0].innerHTML;
-    var referencia = row.cells[1].innerHTML;
-    var diseno = row.cells[2].innerHTML;
-    var marca = row.cells[3].innerHTML;
-    var quienDaIngreso = row.cells[4].innerHTML;
-    var FW = row.cells[5].innerHTML;
-    var cantidadesAgregar = row.cells[6].innerHTML;
+    // Actualizar el índice en el campo oculto
+    document.getElementById("RowIndex").value = rowIndex;
 
-    document.getElementById("CodigoProducto").value = codigoProducto;
-    document.getElementById("Referencia").value = referencia;
-    document.getElementById("Diseno").value = diseno;
-    document.getElementById("Marca").value = marca;
-    document.getElementById("QuienDaIngreso").value = quienDaIngreso;
-    document.getElementById("FW").value = FW;
-    document.getElementById("CantidadesAgregar").value = cantidadesAgregar;
+    // Resto de tu código para llenar el formulario con los datos de la fila
+    document.getElementById("CodigoProducto").value = row.cells[0].innerHTML;
+    document.getElementById("Referencia").value = row.cells[1].innerHTML;
+    document.getElementById("tipo").value = row.cells[2].innerHTML;
+    document.getElementById("Marca").value = row.cells[3].innerHTML;
+    document.getElementById("QuienDaIngreso").value = row.cells[4].innerHTML;
+    document.getElementById("FW").value = row.cells[5].innerHTML;
+    document.getElementById("CantidadesAgregar").value = row.cells[6].innerHTML;
 
     // Eliminar la fila al editar
     row.parentNode.removeChild(row);
@@ -107,38 +104,34 @@ function eliminarFila(button) {
 function limpiarFormulario() {
     document.getElementById("CodigoProducto").value = "";
     document.getElementById("Referencia").value = "";
-    document.getElementById("Diseno").value = "";
+    document.getElementById("tipo").value = "";
     document.getElementById("Marca").value = "";
     document.getElementById("QuienDaIngreso").value = "";
     document.getElementById("FW").value = "";
     document.getElementById("CantidadesAgregar").value = "";
 }
 
-function confirmarEnvio() {
-    var table = document.getElementById("tablaInventario");
-
-    if (table.rows.length === 1) {
-        alert("No hay datos en la tabla. Agregue elementos antes de enviar.");
-        return;
-    }
-
-    var confirmacion = window.confirm("¿Estás seguro de agregar al inventario?");
-
-    if (confirmacion) {
-        // Aquí puedes agregar lógica adicional si el usuario hace clic en "Sí"
-        alert("Inventario agregado exitosamente."); // Esto es solo un ejemplo, puedes ajustarlo según tus necesidades
-
-        // Aquí podrías enviar los datos almacenados a una base de datos o realizar otra acción
-        console.log("Datos del inventario a enviar:", inventarioData);
-
-        // Limpiar el array de datos
-        inventarioData = [];
-
-        // Limpiar la tabla
-        table.innerHTML = '<thead><tr><th>Código Producto</th><th>Referencia</th><th>Diseño</th><th>Marca</th><th>Quién da el ingreso</th><th>FW</th><th>Cantidades Agregadas</th><th>Acciones</th></tr></thead><tbody id="tablaBody"></tbody>';
-    }
+function enviarDatosAlServidor() {
+    // Realizar una solicitud POST a tu script PHP
+    fetch('../guardar/guardarproducto.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ inventarioData: inventarioData }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Respuesta del servidor:', data);
+        // Puedes realizar más acciones después de recibir la respuesta del servidor
+    })
+    .catch(error => {
+        console.error('Error al enviar datos al servidor:', error);
+    });
 }
 
-// Asociar la función confirmarEnvio con el botón "Enviar"
-document.getElementById("enviarButton").addEventListener("click", confirmarEnvio);
-
+// Agregar un event listener al botón "Enviar"
+document.getElementById("enviarButton").addEventListener("click", function () {
+    // Llamar a la función enviarDatosAlServidor al hacer clic en el botón
+    enviarDatosAlServidor();
+});

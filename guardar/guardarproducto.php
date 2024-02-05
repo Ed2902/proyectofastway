@@ -1,24 +1,30 @@
 <?php
-require_once("../guardar/guardarproducto.php");
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Crear una instancia de Producto con los valores del formulario
-    $objProducto = new Producto(
-        $_POST["Referencia"],
-        $_POST["Diseno"],
-        $_POST["Marca"],
-        $_POST["QuienDaIngreso"],
-        $_POST["FW"],
-        $_POST["CantidadesAgregar"]
-    );
+// Verificar si se recibieron datos mediante POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Recibir los datos como JSON y decodificarlos
+    $json_data = file_get_contents('php://input');
+    $data = json_decode($json_data, true);
 
-    // Guardar el producto en la base de datos
-    $objProducto->guardar();
+    // Verificar si se pudo decodificar el JSON correctamente
+    if ($data !== null) {
+            
+        error_log('Datos del inventario recibidos:');
+        error_log(print_r($data, true));
 
-    // Puedes imprimir mensajes o redirigir a otra página después de guardar
-    echo "Producto guardado con éxito";
+        // Puedes enviar una respuesta al cliente si es necesario
+        $response = ['success' => true, 'message' => 'Datos recibidos correctamente'];
+        echo json_encode($response);
+    } else {
+        // Si hay un error al decodificar el JSON
+        $response = ['success' => false, 'message' => 'Error al decodificar los datos JSON'];
+        echo json_encode($response);
+    }
 } else {
-    // Si no es una solicitud POST, puedes redirigir a otra página o realizar otras acciones
-    echo "Acceso no autorizado";
+    // Si la solicitud no es de tipo POST
+    $response = ['success' => false, 'message' => 'Solicitud no válida'];
+    echo json_encode($response);
 }
+
+
 ?>

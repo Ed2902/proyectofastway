@@ -41,24 +41,3 @@ $("#menu-toggle").click(function(e) {
         $("#wrapper").toggleClass("toggled");
 });
 
-
-  $(document).ready(function () {
-    // Agregar función para mostrar tooltips en la barra lateral
-    $('.sidebar-nav li').hover(function () {
-      var tooltipText = $(this).attr('data-tooltip');
-      $(this).append('<div class="tooltip">' + tooltipText + '</div>');
-    }, function () {
-      // Remover el tooltip al dejar de hacer hover
-      $('.tooltip').remove();
-    });
-
-    // Agregar función para mostrar tooltips en el panel principal
-    $('#feature-content .panel-body').hover(function () {
-      var tooltipText = $(this).attr('data-tooltip');
-      $(this).append('<div class="tooltip">' + tooltipText + '</div>');
-    }, function () {
-      // Remover el tooltip al dejar de hacer hover
-      $('.tooltip').remove();
-    });
-  });
-

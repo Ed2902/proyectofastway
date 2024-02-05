@@ -1,133 +1,103 @@
 <?php
 
-require_once("./conexion.php");
-
-class Producto
-{
-    private $ID_Producto;
-    private $Referencia;
-    private $Tipo;
+class Producto {
+    private $codigo_producto;
+    private $referencia;
+    private $tipo;
+    private $marca;
     private $ID_Usuario;
-    private $FW;
+    private $fw;
     private $Cantidad;
+    private $conexion;
 
-    const TABLA = 'productos';
-
-    // Constructor
-    public function __construct($Referencia, $Tipo, $ID_Usuario, $FW, $Cantidad, $ID_Producto = null)
-    {
-        $this->ID_Producto = $ID_Producto;
-        $this->Referencia = $Referencia;
-        $this->Tipo = $Tipo;
+    public function __construct($codigo_producto, $referencia, $tipo, $marca, $ID_Usuario, $fw, $Cantidad) {
+        $this->codigo_producto = $codigo_producto;
+        $this->referencia = $referencia;
+        $this->tipo = $tipo;
+        $this->marca = $marca;
         $this->ID_Usuario = $ID_Usuario;
-        $this->FW = $FW;
-        $this->Cantidad = $Cantidad;
-    }
+        $this->fw = $fw;
+        $this->Cantidad = $Cantidad;}
 
-    // Getters y Setters
-    public function getID_Producto()
-    {
-        return $this->ID_Producto;
-    }
+                // Getters
+                public function getcodigo_producto() {
+                    return $this->codigo_producto;
+                }
 
-    public function setID_Producto($ID_Producto)
-    {
-        $this->ID_Producto = $ID_Producto;
-    }
+                public function getReferencia() {
+                    return $this->referencia;
+                }
 
-    public function getReferencia()
-    {
-        return $this->Referencia;
-    }
+                public function getTipo() {
+                    return $this->tipo;
+                }
 
-    public function setReferencia($Referencia)
-    {
-        $this->Referencia = $Referencia;
-    }
+                public function getMarca() {
+                    return $this->marca;
+                }
 
-    public function getTipo()
-    {
-        return $this->Tipo;
-    }
+                public function getIDUsuario() {
+                    return $this->ID_Usuario;
+                }
 
-    public function setTipo($Tipo)
-    {
-        $this->Tipo = $Tipo;
-    }
+                public function getFW() {
+                    return $this->fw;
+                }
 
-    public function getID_Usuario()
-    {
-        return $this->ID_Usuario;
-    }
+                public function getCantidad() {
+                    return $this->Cantidad;
+                }
 
-    public function setID_Usuario($ID_Usuario)
-    {
-        $this->ID_Usuario = $ID_Usuario;
-    }
+                // Setters
+                public function setCodigoProducto($codigo_producto) {
+                    $this->codigo_producto = $codigo_producto;
+                }
 
-    public function getFW()
-    {
-        return $this->FW;
-    }
+                public function setReferencia($referencia) {
+                    $this->referencia = $referencia;
+                }
 
-    public function setFW($FW)
-    {
-        $this->FW = $FW;
-    }
+                public function setTipo($tipo) {
+                    $this->tipo = $tipo;
+                }
 
-    public function getCantidad()
-    {
-        return $this->Cantidad;
-    }
+                public function setMarca($marca) {
+                    $this->marca = $marca;
+                }
 
-    public function setCantidad($Cantidad)
-    {
-        $this->Cantidad = $Cantidad;
-    }
+                public function setIDUsuario($ID_Usuario) {
+                    $this->ID_Usuario = $ID_Usuario;
+                }
 
-    public function guardar()
-    {
-        $conexion = new Conexion();
-        $consulta = $conexion->prepare('INSERT INTO productos (Referencia, Tipo, ID_Usuario, FW, Cantidad)
-            VALUES (:Referencia, :Tipo, :ID_Usuario, :FW, :Cantidad)');
+                public function setFW($fw) {
+                    $this->fw = $fw;
+                }
 
-        try {
-            $consulta->bindParam(':Referencia', $this->Referencia);
-            $consulta->bindParam(':Tipo', $this->Tipo);
-            $consulta->bindParam(':ID_Usuario', $this->ID_Usuario);
-            $consulta->bindParam(':FW', $this->FW);
-            $consulta->bindParam(':Cantidad', $this->Cantidad);
-            $consulta->execute();
-            $this->ID_Producto = $conexion->lastInsertId();
+                public function setCantidad($Cantidad) {
+                    $this->Cantidad = $Cantidad;
+                }
 
-            echo "Producto guardado con éxito";
-        } catch (PDOException $e) {
-            echo "Ha surgido un error y no se pudo guardar el producto. Detalle: " . $e->getMessage();
+    public function guardar() {
+        // Preparar la consulta SQL con marcadores de posición (?)
+        $stmt = $this->conexion->prepare('INSERT INTO inventario (codigo_producto, referencia, tipo, marca, ID_Usuario, fw, Cantidad) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    
+        // Vincular los parámetros
+        $stmt->bind_param('ssssssi', $this->codigo_producto, $this->referencia, $this->tipo, $this->marca, $this->ID_Usuario, $this->fw, $this->Cantidad);
+    
+        // Ejecutar la consulta
+        $stmt->execute();
+    
+        // Verificar si se insertó correctamente
+        if ($stmt->affected_rows > 0) {
+            echo 'Producto agregado exitosamente';
+        } else {
+            echo 'Error al agregar el producto';
         }
+    
+        // Cerrar la consulta
+        $stmt->close();
+    
+        // Cerrar la conexión
+        $this->conexion->close();
     }
-
-    // Resto de métodos actualizados...
-
-    public static function obtenerProductoPorID($ID_Producto)
-    {
-        $conexion = new Conexion();
-        $consulta = $conexion->prepare('SELECT * FROM ' . self::TABLA . ' WHERE ID_Producto = :ID_Producto');
-        $consulta->bindParam(':ID_Producto', $ID_Producto);
-        $consulta->execute();
-        $producto = $consulta->fetch(PDO::FETCH_ASSOC);
-        $conexion = null;
-
-        return $producto;
-    }
-
-    public static function obtenerCantidadDisponiblePorTipo()
-    {
-        $conexion = new Conexion();
-        $consulta = $conexion->prepare('SELECT Tipo, SUM(Cantidad) as Total FROM ' . self::TABLA . ' GROUP BY Tipo');
-        $consulta->execute();
-        $cantidadPorTipo = $consulta->fetchAll(PDO::FETCH_ASSOC);
-        $conexion = null;
-
-        return $cantidadPorTipo;
-    }
-}
+ }
